@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:hti22one/contacts_screen.dart';
 import 'package:hti22one/messenger_screen.dart';
 import 'package:hti22one/stack.dart';
 import 'package:hti22one/third_screen.dart';
+
+import 'names_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -28,7 +31,7 @@ class MyApp extends StatelessWidget {
       ),
       darkTheme: ThemeData(primarySwatch: Colors.brown),
       themeMode: ThemeMode.light,
-      home: MessengerScreen(),
+      home: ContactsScreen(),
     );
   }
 }
