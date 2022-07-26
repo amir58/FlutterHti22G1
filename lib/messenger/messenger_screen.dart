@@ -1,49 +1,92 @@
 import 'package:flutter/material.dart';
 
+import 'chat_model.dart';
+
 class MessengerScreen extends StatelessWidget {
+  MessengerScreen({Key? key}) : super(key: key);
+
   final String moSalahUrl =
       "https://d3j2s6hdd6a7rg.cloudfront.net/v2/uploads/media/default/0002/23/thumb_122243_default_news_size_5.jpeg";
+  final String imageUrl =
+      "https://ichef.bbci.co.uk/news/976/cpsprodpb/15E47/production/_124717698_gettyimages-1395200655.jpg";
 
-  const MessengerScreen({Key? key}) : super(key: key);
+  List<ChatModel> chats = [];
 
   @override
   Widget build(BuildContext context) {
+    initData();
+    initData();
+    initData();
+    chats.shuffle();
+
     return Scaffold(
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(10.0),
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                buildCustomAppBar(),
-                const SizedBox(height: 15),
-                buildSerachItem(),
-                const SizedBox(height: 15),
-                buildYourStoryAndOnlineFriends(),
-                const SizedBox(height: 15),
-                buildChatItem(),
-                buildChatItem(),
-                buildChatItem(),
-                buildChatItem(),
-                buildChatItem(),
-                buildChatItem(),
-                buildChatItem(),
-                buildChatItem(),
-                buildChatItem(),
-                buildChatItem(),
-                buildChatItem(),
-                buildChatItem(),
-                buildChatItem(),
-                buildChatItem(),
-              ],
-            ),
+          child: Column(
+            children: [
+              buildCustomAppBar(),
+              const SizedBox(height: 15),
+              buildSerachItem(),
+              const SizedBox(height: 15),
+              buildYourStoryAndOnlineFriends(),
+              const SizedBox(height: 15),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: chats.length,
+                  itemBuilder: (context, index) {
+                    ChatModel chat = chats[index];
+
+                    return buildChatItem(data: chat);
+                  },
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget buildChatItem(){
+  void initData() {
+    chats.add(ChatModel(
+      moSalahUrl,
+      "Ali",
+      "How are you",
+      "now",
+      true,
+      false,
+    ));
+
+    chats.add(ChatModel(
+      imageUrl,
+      "Ahmed",
+      "Where are you",
+      "5:45 pm",
+      false,
+      true,
+    ));
+
+    chats.add(ChatModel(
+      moSalahUrl,
+      "Mohamed",
+      "call me ASAP",
+      "yesterday",
+      true,
+      true,
+    ));
+
+    chats.add(ChatModel(
+      imageUrl,
+      "Amir",
+      "I'm waiting you",
+      "now",
+      false,
+      false,
+    ));
+  }
+
+  Widget buildChatItem({required ChatModel data}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
@@ -53,14 +96,14 @@ class MessengerScreen extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 32,
-                backgroundImage: NetworkImage(moSalahUrl),
+                backgroundImage: NetworkImage(data.imageUrl),
               ),
               const CircleAvatar(
                 backgroundColor: Colors.white,
                 radius: 12,
               ),
-              const CircleAvatar(
-                backgroundColor: Colors.green,
+              CircleAvatar(
+                backgroundColor: data.online ? Colors.green : Colors.red,
                 radius: 10,
               ),
             ],
@@ -70,30 +113,30 @@ class MessengerScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "Mohammed Salah",
-                  style: TextStyle(
+                Text(
+                  data.username,
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
                 Row(
-                  children: const [
+                  children: [
                     Expanded(
                       child: Text(
-                        "You : Hello, how are you  how are you ",
+                        "You : ${data.message}",
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 16,
                         ),
                       ),
                     ),
-                    SizedBox(width: 5),
+                    const SizedBox(width: 5),
                     Text(
-                      "8:42 pm",
-                      style: TextStyle(
+                      data.dateTime,
+                      style: const TextStyle(
                         fontSize: 16,
                       ),
                     ),
@@ -103,9 +146,12 @@ class MessengerScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          const CircleAvatar(
-            backgroundColor: Colors.blue,
-            radius: 8,
+          Visibility(
+            visible: data.seen,
+            child: const CircleAvatar(
+              backgroundColor: Colors.blue,
+              radius: 8,
+            ),
           ),
         ],
       ),

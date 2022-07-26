@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hti22one/bmi/bmi.dart';
 import 'package:hti22one/contacts_screen.dart';
-import 'package:hti22one/messenger_screen.dart';
+import 'package:hti22one/messenger/messenger_screen.dart';
 import 'package:hti22one/stack.dart';
 import 'package:hti22one/third_screen.dart';
 
@@ -31,7 +32,7 @@ class MyApp extends StatelessWidget {
       ),
       darkTheme: ThemeData(primarySwatch: Colors.brown),
       themeMode: ThemeMode.light,
-      home: ContactsScreen(),
+      home: BmiScreen(),
     );
   }
 }
@@ -72,11 +73,12 @@ class SecondScreen extends StatelessWidget {
       //   ),
       // )),
       appBar: AppBar(
-        title:  Text("HTI App",),
+        title: Text(
+          "HTI App",
+        ),
         leading: const Icon(Icons.info),
         backgroundColor: Colors.green,
-        elevation:  10,
-
+        elevation: 10,
         actions: [
           IconButton(
             onPressed: () {
@@ -151,11 +153,29 @@ class SecondScreen extends StatelessWidget {
   }
 }
 
-class FirstScreen extends StatelessWidget {
+class FirstScreen extends StatefulWidget {
+  FirstScreen() {}
+
+  @override
+  State<FirstScreen> createState() => _FirstScreenState();
+}
+
+class _FirstScreenState extends State<FirstScreen> {
   int counter = 0;
+
+  _FirstScreenState() {
+    print('_FirstScreenState');
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    print('initState');
+  }
 
   @override
   Widget build(BuildContext context) {
+    print('build');
     return Scaffold(
       appBar: AppBar(
         title: const Text("First Screen"),
@@ -166,7 +186,7 @@ class FirstScreen extends StatelessWidget {
         onPressed: () {
           counter++;
           print(counter);
-          // setState((){});
+          setState(() {});
         },
       ),
       body: Center(
