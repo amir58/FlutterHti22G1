@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hti22one/messenger/my_circle_icon_button.dart';
+import 'package:hti22one/messenger/my_search_view.dart';
 
 import 'chat_model.dart';
 
@@ -27,7 +29,11 @@ class MessengerScreen extends StatelessWidget {
             children: [
               buildCustomAppBar(),
               const SizedBox(height: 15),
-              buildSerachItem(),
+              MySearchView(
+                onFieldSubmitted: (value) {
+                  print('From messenger screen -> $value');
+                },
+              ),
               const SizedBox(height: 15),
               buildYourStoryAndOnlineFriends(),
               const SizedBox(height: 15),
@@ -271,21 +277,6 @@ class MessengerScreen extends StatelessWidget {
     );
   }
 
-  Widget buildSerachItem() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[300],
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: TextFormField(
-        decoration: const InputDecoration(
-            hintText: "Search",
-            prefixIcon: Icon(Icons.search),
-            border: InputBorder.none),
-      ),
-    );
-  }
-
   Widget buildCustomAppBar() {
     return Row(
       children: [
@@ -299,9 +290,19 @@ class MessengerScreen extends StatelessWidget {
           ),
         ),
         const Spacer(),
-        buildTopIconButton(Icons.camera_alt_rounded),
+        MyCircleIconButton(
+          iconData: Icons.camera_alt_rounded,
+          onPressed: () {
+            print('Camera');
+          },
+        ),
         const SizedBox(width: 10),
-        buildTopIconButton(Icons.edit),
+        MyCircleIconButton(
+          iconData: Icons.edit,
+          onPressed: () {
+            print('Edit');
+          },
+        ),
       ],
     );
   }
@@ -324,19 +325,6 @@ class MessengerScreen extends StatelessWidget {
           child: Text("2"),
         ),
       ],
-    );
-  }
-
-  Widget buildTopIconButton(IconData iconData) {
-    return CircleAvatar(
-      backgroundColor: Colors.grey[300],
-      child: IconButton(
-        onPressed: () {},
-        icon: Icon(
-          iconData,
-          color: Colors.black,
-        ),
-      ),
     );
   }
 }
