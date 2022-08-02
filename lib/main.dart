@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hti22one/assets_screen.dart';
 import 'package:hti22one/bmi/bmi.dart';
+import 'package:hti22one/contacts/contacts_main_screen.dart';
 import 'package:hti22one/contacts_screen.dart';
 import 'package:hti22one/messenger/messenger_screen.dart';
 import 'package:hti22one/stack.dart';
@@ -33,7 +34,7 @@ class MyApp extends StatelessWidget {
       ),
       darkTheme: ThemeData(primarySwatch: Colors.brown),
       themeMode: ThemeMode.light,
-      home: ThirdScreen(),
+      home: ContactsMainScreen(),
     );
   }
 }
