@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hti22one/messenger/my_circle_icon_button.dart';
 
 import '../contacts_screen.dart';
+import 'contacts_main_screen.dart';
 
 class ContactsFavoritesScreen extends StatefulWidget {
   const ContactsFavoritesScreen({Key? key}) : super(key: key);
@@ -12,22 +13,34 @@ class ContactsFavoritesScreen extends StatefulWidget {
 }
 
 class _ContactsFavoritesScreenState extends State<ContactsFavoritesScreen> {
-  final List<MyContact> contacts = [
-    MyContact("Ali", "01129357239"),
-    MyContact("Ahmed", "01129357239"),
-    MyContact("Ehab", "01123447239"),
-    MyContact("Eslam", "01129357239"),
-    MyContact("Diaa", "01129357239"),
-    MyContact("Zein", "01129346439"),
-    MyContact("Amr", "01436457239"),
-    MyContact("Ali", "01129357239"),
-    MyContact("Ahmed", "01129357239"),
-    MyContact("Ehab", "01123447239"),
-    MyContact("Eslam", "01129357239"),
-    MyContact("Diaa", "01129357239"),
-    MyContact("Zein", "01129346439"),
-    MyContact("Amr", "01436457239"),
-  ];
+  List<Map> contacts = [];
+
+  void getContacts() async {
+    database
+        .query("Contacts",
+            columns: ["id", "name", "phone", "favorite"],
+            where: 'favorite = ?',
+            whereArgs: ['1'])
+        .then(
+      (value) {
+        contacts = value;
+        print(contacts);
+        setState(() {});
+      },
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    print('My contacts init state');
+    Future.delayed(
+      const Duration(seconds: 1),
+      () async {
+        getContacts();
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +51,7 @@ class _ContactsFavoritesScreenState extends State<ContactsFavoritesScreen> {
       separatorBuilder: (context, index) {
         return const SizedBox(height: 10);
       },
-      itemCount: 10,
+      itemCount: contacts.length,
     );
   }
 
@@ -52,7 +65,7 @@ class _ContactsFavoritesScreenState extends State<ContactsFavoritesScreen> {
       ),
       child: InkWell(
         onTap: () {
-          print("Phone number => ${contacts[index].phone}");
+          print("Phone number => ${contacts[index]['phone']}");
         },
         child: Row(
           children: [
@@ -61,12 +74,12 @@ class _ContactsFavoritesScreenState extends State<ContactsFavoritesScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    contacts[index].name,
+                    contacts[index]['name'],
                     style: const TextStyle(
                         fontWeight: FontWeight.bold, fontSize: 22),
                   ),
                   Text(
-                    contacts[index].phone,
+                    contacts[index]['phone'],
                     style: const TextStyle(fontSize: 20),
                   ),
                 ],
@@ -75,11 +88,24 @@ class _ContactsFavoritesScreenState extends State<ContactsFavoritesScreen> {
             MyCircleIconButton(
               iconData: Icons.favorite,
               color: Colors.blue,
-              onPressed: () {},
+              onPressed: () {
+                updateContact(favorite: 0, id: contacts[index]['id']);
+              },
             ),
           ],
         ),
       ),
     );
+  }
+
+  void updateContact({
+    required int favorite,
+    required int id,
+  }) async {
+    int count = await database.rawUpdate(
+        'UPDATE Contacts SET favorite = ? WHERE id = ?', ['$favorite', '$id']);
+    print('updated: $count');
+
+    getContacts();
   }
 }

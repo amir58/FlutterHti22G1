@@ -315,7 +315,9 @@ class _BmiScreenState extends State<BmiScreen> {
             MaterialPageRoute(
               builder: (context) => BmiResultScreen(),
             ),
-          );
+          ).then((value) {
+
+          });
         },
         child: const Text(
           "CALCULATE",
