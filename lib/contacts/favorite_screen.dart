@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hti22one/contacts/contacts_cubit.dart';
+import 'package:hti22one/contacts/contacts_states.dart';
 import 'package:hti22one/messenger/my_circle_icon_button.dart';
 
 import '../contacts_screen.dart';
@@ -13,45 +16,30 @@ class ContactsFavoritesScreen extends StatefulWidget {
 }
 
 class _ContactsFavoritesScreenState extends State<ContactsFavoritesScreen> {
-  List<Map> contacts = [];
 
-  void getContacts() async {
-    database
-        .query("Contacts",
-            columns: ["id", "name", "phone", "favorite"],
-            where: 'favorite = ?',
-            whereArgs: ['1'])
-        .then(
-      (value) {
-        contacts = value;
-        print(contacts);
-        setState(() {});
-      },
-    );
-  }
 
   @override
   void initState() {
     super.initState();
     print('My contacts init state');
-    Future.delayed(
-      const Duration(seconds: 1),
-      () async {
-        getContacts();
-      },
-    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-      itemBuilder: (context, index) {
-        return buildContactItem(index);
+    return BlocBuilder<ContactsCubit, ContactsStates>(
+      builder: (context, state) {
+        print('STATE 2 => $state');
+
+        return ListView.separated(
+          itemBuilder: (context, index) {
+            return buildContactItem(index);
+          },
+          separatorBuilder: (context, index) {
+            return const SizedBox(height: 10);
+          },
+          itemCount: context.read<ContactsCubit>().favorites.length,
+        );
       },
-      separatorBuilder: (context, index) {
-        return const SizedBox(height: 10);
-      },
-      itemCount: contacts.length,
     );
   }
 
@@ -65,7 +53,7 @@ class _ContactsFavoritesScreenState extends State<ContactsFavoritesScreen> {
       ),
       child: InkWell(
         onTap: () {
-          print("Phone number => ${contacts[index]['phone']}");
+          print("Phone number => ${context.read<ContactsCubit>().favorites[index]['phone']}");
         },
         child: Row(
           children: [
@@ -74,12 +62,12 @@ class _ContactsFavoritesScreenState extends State<ContactsFavoritesScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    contacts[index]['name'],
+                    context.read<ContactsCubit>().favorites[index]['name'],
                     style: const TextStyle(
                         fontWeight: FontWeight.bold, fontSize: 22),
                   ),
                   Text(
-                    contacts[index]['phone'],
+                    context.read<ContactsCubit>().favorites[index]['phone'],
                     style: const TextStyle(fontSize: 20),
                   ),
                 ],
@@ -89,7 +77,7 @@ class _ContactsFavoritesScreenState extends State<ContactsFavoritesScreen> {
               iconData: Icons.favorite,
               color: Colors.blue,
               onPressed: () {
-                updateContact(favorite: 0, id: contacts[index]['id']);
+                // updateContact(favorite: 0, id: contacts[index]['id']);
               },
             ),
           ],
@@ -98,14 +86,4 @@ class _ContactsFavoritesScreenState extends State<ContactsFavoritesScreen> {
     );
   }
 
-  void updateContact({
-    required int favorite,
-    required int id,
-  }) async {
-    int count = await database.rawUpdate(
-        'UPDATE Contacts SET favorite = ? WHERE id = ?', ['$favorite', '$id']);
-    print('updated: $count');
-
-    getContacts();
-  }
 }

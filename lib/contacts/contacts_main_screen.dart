@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hti22one/contacts/contacts_cubit.dart';
 import 'package:hti22one/contacts/contacts_screen.dart';
 import 'package:hti22one/contacts/favorite_screen.dart';
 import 'package:sqflite/sqflite.dart';
 
 // CRUD => Create , Read , Update, Delete
 late Database database;
-List<Map> contacts = [];
 
 class ContactsMainScreen extends StatefulWidget {
   const ContactsMainScreen({Key? key}) : super(key: key);
@@ -15,68 +16,6 @@ class ContactsMainScreen extends StatefulWidget {
 }
 
 class _ContactsMainScreenState extends State<ContactsMainScreen> {
-
-  void createDatabase() async {
-    database = await openDatabase(
-      "contacts",
-      version: 1,
-      onCreate: (Database db, int version) async {
-        // When creating the db, create the table
-        print('Database created');
-        await db.execute(
-            'CREATE TABLE Contacts (id INTEGER PRIMARY KEY, name TEXT, phone TEXT, favorite INTEGER)');
-      },
-      onOpen: (database) {
-        print('Database opened');
-      },
-    );
-
-    getContacts();
-
-    // openDatabase("contacts", version: 1,
-    //     onCreate: (Database db, int version) async {
-    //       // When creating the db, create the table
-    //       await db.execute(
-    //           'CREATE TABLE Test (id INTEGER PRIMARY KEY, name TEXT, value INTEGER, num REAL)');
-    //     }).then((value){
-    //
-    // });
-  }
-
-  void insertContact({
-    required String name,
-    required String phone,
-  }) async {
-    await database.transaction((txn) async {
-      int id1 = await txn.rawInsert(
-          'INSERT INTO Contacts(name, phone, favorite) VALUES("$name", "$phone", 0)');
-
-      print('inserted : $id1');
-    });
-  }
-
-  void updateContact({
-    required int favorite,
-    required int id,
-  }) async {
-    int count = await database.rawUpdate(
-        'UPDATE Contacts SET favorite = ? WHERE id = ?', ['$favorite', '$id']);
-    print('updated: $count');
-  }
-
-  void getContacts() async {
-    List<Map> list = await database.rawQuery('SELECT * FROM Contacts');
-    print(list);
-    setState((){});
-  }
-
-  void deleteContact({required int id}) async {
-    var count =
-        await database.rawDelete('DELETE FROM Contacts WHERE id = ?', ['$id']);
-    print('Delete : $count');
-
-    getContacts();
-  }
 
   List<Widget> screens = [
     const MyContactsScreen(),
@@ -92,7 +31,8 @@ class _ContactsMainScreenState extends State<ContactsMainScreen> {
   @override
   void initState() {
     super.initState();
-    createDatabase();
+    // createDatabase();
+    context.read<ContactsCubit>().createDatabase();
   }
 
   @override
@@ -205,7 +145,7 @@ class _ContactsMainScreenState extends State<ContactsMainScreen> {
 
                       String phone = phoneController.text;
 
-                      insertContact(name: name, phone: phone);
+                      // insertContact(name: name, phone: phone);
 
                       Navigator.pop(context);
                     }

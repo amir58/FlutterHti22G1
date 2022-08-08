@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hti22one/assets_screen.dart';
 import 'package:hti22one/bmi/bmi.dart';
+import 'package:hti22one/contacts/contacts_cubit.dart';
 import 'package:hti22one/contacts/contacts_main_screen.dart';
 import 'package:hti22one/contacts_screen.dart';
 import 'package:hti22one/messenger/messenger_screen.dart';
 import 'package:hti22one/stack.dart';
 import 'package:hti22one/third_screen.dart';
 
+import 'counter_cubit/counter_cubit_screen.dart';
 import 'names_screen.dart';
 
 void main() {
@@ -17,6 +20,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    print('App RUN');
     return MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
@@ -34,7 +38,10 @@ class MyApp extends StatelessWidget {
       ),
       darkTheme: ThemeData(primarySwatch: Colors.brown),
       themeMode: ThemeMode.light,
-      home: ContactsMainScreen(),
+      home: BlocProvider(
+        create: (_) => ContactsCubit(),
+        child: ContactsMainScreen(),
+      ),
     );
   }
 }
