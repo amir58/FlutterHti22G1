@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hti22one/contacts/contacts_cubit.dart';
 import 'package:hti22one/contacts/contacts_screen.dart';
+import 'package:hti22one/contacts/contacts_states.dart';
 import 'package:hti22one/contacts/favorite_screen.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -37,34 +38,42 @@ class _ContactsMainScreenState extends State<ContactsMainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: scaffoldKey,
-      appBar: AppBar(
-        title: Text(titles[index]),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        onTap: (value) {
-          index = value;
-          setState(() {});
-        },
-        currentIndex: index,
-        items: const [
-          BottomNavigationBarItem(
-              icon: Icon(Icons.contacts), label: "Contacts"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.favorite), label: "Favorites"),
-        ],
-      ),
-      floatingActionButton: Visibility(
-        visible: index == 0,
-        child: FloatingActionButton(
-          onPressed: () {
-            scaffoldBottomSheet();
-          },
-          child: const Icon(Icons.add),
+    return BlocListener<ContactsCubit, ContactsStates>(
+      listener: (context, state) {
+        print('BlocListener => $state}');
+        if(state is InsertContactState){
+          context.read<ContactsCubit>().getContacts();
+        }
+      },
+      child: Scaffold(
+        key: scaffoldKey,
+        appBar: AppBar(
+          title: Text(titles[index]),
         ),
+        bottomNavigationBar: BottomNavigationBar(
+          onTap: (value) {
+            index = value;
+            setState(() {});
+          },
+          currentIndex: index,
+          items: const [
+            BottomNavigationBarItem(
+                icon: Icon(Icons.contacts), label: "Contacts"),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.favorite), label: "Favorites"),
+          ],
+        ),
+        floatingActionButton: Visibility(
+          visible: index == 0,
+          child: FloatingActionButton(
+            onPressed: () {
+              scaffoldBottomSheet();
+            },
+            child: const Icon(Icons.add),
+          ),
+        ),
+        body: screens[index],
       ),
-      body: screens[index],
     );
   }
 
@@ -145,7 +154,12 @@ class _ContactsMainScreenState extends State<ContactsMainScreen> {
 
                       String phone = phoneController.text;
 
-                      // insertContact(name: name, phone: phone);
+                      context.read<ContactsCubit>()
+                          .insertContact(name: name, phone: phone);
+
+                      nameController.clear();
+
+                      phoneController.clear();
 
                       Navigator.pop(context);
                     }

@@ -27,6 +27,9 @@ class _ContactsFavoritesScreenState extends State<ContactsFavoritesScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ContactsCubit, ContactsStates>(
+      buildWhen: (previous, current) {
+        return current is GetFavoritesState;
+      },
       builder: (context, state) {
         print('STATE 2 => $state');
 
@@ -77,7 +80,7 @@ class _ContactsFavoritesScreenState extends State<ContactsFavoritesScreen> {
               iconData: Icons.favorite,
               color: Colors.blue,
               onPressed: () {
-                // updateContact(favorite: 0, id: contacts[index]['id']);
+                context.read<ContactsCubit>().updateContact(favorite: 0, id: context.read<ContactsCubit>().favorites[index]['id']);
               },
             ),
           ],

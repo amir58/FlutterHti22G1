@@ -18,7 +18,6 @@ class MyContactsScreen extends StatefulWidget {
 }
 
 class _MyContactsScreenState extends State<MyContactsScreen> {
-
   @override
   void initState() {
     super.initState();
@@ -27,6 +26,7 @@ class _MyContactsScreenState extends State<MyContactsScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ContactsCubit, ContactsStates>(
+      buildWhen: (previous, current) => current is GetContactsState,
       builder: (context, state) {
         print('STATE 1 => $state');
         return ListView.separated(
@@ -52,7 +52,8 @@ class _MyContactsScreenState extends State<MyContactsScreen> {
       ),
       child: InkWell(
         onTap: () {
-          print("Phone number => ${context.read<ContactsCubit>().contacts[index]['phone']}");
+          print(
+              "Phone number => ${context.read<ContactsCubit>().contacts[index]['phone']}");
         },
         child: Row(
           children: [
@@ -73,16 +74,31 @@ class _MyContactsScreenState extends State<MyContactsScreen> {
               ),
             ),
             MyCircleIconButton(
-              iconData: context.read<ContactsCubit>().contacts[index]['favorite'] == 1
-                  ? Icons.favorite
-                  : Icons.favorite_border,
+              iconData:
+                  context.read<ContactsCubit>().contacts[index]['favorite'] == 1
+                      ? Icons.favorite
+                      : Icons.favorite_border,
               color:
-              context.read<ContactsCubit>().contacts[index]['favorite'] == 1 ? Colors.blue : Colors.black,
+                  context.read<ContactsCubit>().contacts[index]['favorite'] == 1
+                      ? Colors.blue
+                      : Colors.black,
               onPressed: () {
-                // updateContact(
-                //   favorite: contacts[index]['favorite'] == 0 ? 1 : 0,
-                //   id: contacts[index]['id'],
-                // );
+                context.read<ContactsCubit>().updateContact(
+                      favorite: context.read<ContactsCubit>().contacts[index]
+                                  ['favorite'] ==
+                              0
+                          ? 1
+                          : 0,
+                      id: context.read<ContactsCubit>().contacts[index]['id'],
+                    );
+              },
+            ),
+            const SizedBox(width: 10),
+            MyCircleIconButton(
+              iconData: Icons.delete,
+              color: Colors.red,
+              onPressed: () {
+                _showDeleteContactDialog(index);
               },
             ),
           ],
@@ -91,4 +107,37 @@ class _MyContactsScreenState extends State<MyContactsScreen> {
     );
   }
 
+  Future<void> _showDeleteContactDialog(int index) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Alert!'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: const <Widget>[
+                Text('Are you sure to delete this contact !'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Delete'),
+              onPressed: () {
+                this.context.read<ContactsCubit>().deleteContact(index);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 }

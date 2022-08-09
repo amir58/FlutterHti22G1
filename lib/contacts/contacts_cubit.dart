@@ -72,7 +72,7 @@ class ContactsCubit extends Cubit<ContactsStates> {
       print('inserted : $id1');
     });
 
-    getContacts();
+    emit(InsertContactState());
   }
 
   void updateContact({
@@ -84,9 +84,11 @@ class ContactsCubit extends Cubit<ContactsStates> {
     print('updated: $count');
 
     getContacts();
+    getFavorites();
   }
 
-  void deleteContact({required int id}) async {
+  void deleteContact(int index) async {
+    int id = contacts[index]['id'];
     var count =
         await database.rawDelete('DELETE FROM Contacts WHERE id = ?', ['$id']);
     print('Delete : $count');
