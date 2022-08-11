@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hti22one/contacts/contacts_states.dart';
 import 'package:sqflite/sqflite.dart';
@@ -5,9 +6,11 @@ import 'package:sqflite/sqflite.dart';
 class ContactsCubit extends Cubit<ContactsStates> {
   ContactsCubit() : super(InitContactState());
 
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
+
   late Database database;
-  List<Map> contacts = [];
-  List<Map> favorites = [];
+  List<Map<String, dynamic>> contacts = [];
+  List<Map<String, dynamic>> favorites = [];
 
   void createDatabase() async {
     print('Start create database');
@@ -39,26 +42,52 @@ class ContactsCubit extends Cubit<ContactsStates> {
   }
 
   void getContacts() async {
-    contacts = await database.rawQuery('SELECT * FROM Contacts');
+    // contacts = await database.rawQuery('SELECT * FROM Contacts');
     print(contacts);
     // setState((){});
+
+    await firestore.collection("htiOneContacts").get().then(
+      (value) {
+        contacts.clear();
+        for (var element in value.docs) {
+          print('- - - - - - - - -');
+          print(element.data());
+          contacts.add(element.data());
+        }
+      },
+    );
+
     emit(GetContactsState());
   }
 
   void getFavorites() async {
-    database
-        .query("Contacts",
-            columns: ["id", "name", "phone", "favorite"],
-            where: 'favorite = ?',
-            whereArgs: ['1'])
-        .then(
-      (value) {
-        favorites = value;
-        print(favorites);
-        // setState(() {});
-        emit(GetFavoritesState());
-      },
-    );
+    // database
+    //     .query("Contacts",
+    //         columns: ["id", "name", "phone", "favorite"],
+    //         where: 'favorite = ?',
+    //         whereArgs: ['1'])
+    //     .then(
+    //   (value) {
+    //     favorites = value;
+    //     print(favorites);
+    //     // setState(() {});
+    //     emit(GetFavoritesState());
+    //   },
+    // );
+
+    firestore
+        .collection("htiOneContacts")
+        .where("favorite", isEqualTo: 1)
+        .get()
+        .then((value) {
+      favorites.clear();
+      for (var element in value.docs) {
+        print('- - - - - - - - -');
+        print(element.data());
+        favorites.add(element.data());
+      }
+      emit(GetFavoritesState());
+    });
   }
 
   void insertContact({
@@ -66,10 +95,15 @@ class ContactsCubit extends Cubit<ContactsStates> {
     required String phone,
   }) async {
     await database.transaction((txn) async {
-      int id1 = await txn.rawInsert(
+      int contactId = await txn.rawInsert(
           'INSERT INTO Contacts(name, phone, favorite) VALUES("$name", "$phone", 0)');
 
-      print('inserted : $id1');
+      firestore.collection("htiOneContacts").doc(contactId.toString()).set({
+        "id": contactId,
+        "name": name,
+        "phone": phone,
+        "favorite": 0,
+      });
     });
 
     emit(InsertContactState());
@@ -83,6 +117,11 @@ class ContactsCubit extends Cubit<ContactsStates> {
         'UPDATE Contacts SET favorite = ? WHERE id = ?', ['$favorite', '$id']);
     print('updated: $count');
 
+    firestore
+        .collection("htiOneContacts")
+        .doc(id.toString())
+        .update({'favorite': favorite});
+
     getContacts();
     getFavorites();
   }
@@ -92,6 +131,8 @@ class ContactsCubit extends Cubit<ContactsStates> {
     var count =
         await database.rawDelete('DELETE FROM Contacts WHERE id = ?', ['$id']);
     print('Delete : $count');
+
+    firestore.collection("htiOneContacts").doc(id.toString()).delete();
 
     getContacts();
   }

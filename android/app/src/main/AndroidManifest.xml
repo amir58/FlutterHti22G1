@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.amirmohammed.hti.hti22one">
    <application
+        android:usesCleartextTraffic="true"
         android:label="hti22one"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
