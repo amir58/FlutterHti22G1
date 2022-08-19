@@ -1,5 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hti22one/auth/auth_cubit.dart';
+import 'package:hti22one/auth/login_screen.dart';
 import 'package:hti22one/contacts/contacts_cubit.dart';
 import 'package:hti22one/contacts/contacts_screen.dart';
 import 'package:hti22one/contacts/contacts_states.dart';
@@ -17,7 +20,6 @@ class ContactsMainScreen extends StatefulWidget {
 }
 
 class _ContactsMainScreenState extends State<ContactsMainScreen> {
-
   List<Widget> screens = [
     const MyContactsScreen(),
     const ContactsFavoritesScreen(),
@@ -41,7 +43,7 @@ class _ContactsMainScreenState extends State<ContactsMainScreen> {
     return BlocListener<ContactsCubit, ContactsStates>(
       listener: (context, state) {
         print('BlocListener => $state}');
-        if(state is InsertContactState){
+        if (state is InsertContactState) {
           context.read<ContactsCubit>().getContacts();
         }
       },
@@ -49,6 +51,21 @@ class _ContactsMainScreenState extends State<ContactsMainScreen> {
         key: scaffoldKey,
         appBar: AppBar(
           title: Text(titles[index]),
+          actions: [
+            IconButton(
+                onPressed: () {
+                  FirebaseAuth.instance.signOut();
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BlocProvider(
+                          create: (context) => AuthCubit(),
+                          child: LoginScreen(),
+                        ),
+                      ));
+                },
+                icon: Icon(Icons.logout))
+          ],
         ),
         bottomNavigationBar: BottomNavigationBar(
           onTap: (value) {
@@ -154,7 +171,8 @@ class _ContactsMainScreenState extends State<ContactsMainScreen> {
 
                       String phone = phoneController.text;
 
-                      context.read<ContactsCubit>()
+                      context
+                          .read<ContactsCubit>()
                           .insertContact(name: name, phone: phone);
 
                       nameController.clear();

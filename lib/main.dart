@@ -1,15 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:hti22one/assets_screen.dart';
+import 'package:hti22one/auth/auth_cubit.dart';
 import 'package:hti22one/bmi/bmi.dart';
 import 'package:hti22one/contacts/contacts_cubit.dart';
 import 'package:hti22one/contacts/contacts_main_screen.dart';
 import 'package:hti22one/contacts_screen.dart';
 import 'package:hti22one/messenger/messenger_screen.dart';
 import 'package:hti22one/stack.dart';
-import 'package:hti22one/third_screen.dart';
+import 'package:hti22one/auth/login_screen.dart';
 
 import 'counter_cubit/counter_cubit_screen.dart';
 import 'names_screen.dart';
@@ -29,6 +32,7 @@ class MyApp extends StatelessWidget {
     print('App RUN');
     return MaterialApp(
       title: 'Flutter Demo',
+      builder: EasyLoading.init(),
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         // This is the theme of your application.
@@ -44,9 +48,14 @@ class MyApp extends StatelessWidget {
       ),
       darkTheme: ThemeData(primarySwatch: Colors.brown),
       themeMode: ThemeMode.light,
-      home: BlocProvider(
-        create: (_) => ContactsCubit(),
-        child: ContactsMainScreen(),
+      home: MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (_) => AuthCubit()),
+          BlocProvider(create: (_) => ContactsCubit()),
+        ],
+        child: FirebaseAuth.instance.currentUser == null
+            ? LoginScreen()
+            : ContactsMainScreen(),
       ),
     );
   }
