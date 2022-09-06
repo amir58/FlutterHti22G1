@@ -7,6 +7,7 @@ import 'package:hti22one/contacts/contacts_cubit.dart';
 import 'package:hti22one/contacts/contacts_screen.dart';
 import 'package:hti22one/contacts/contacts_states.dart';
 import 'package:hti22one/contacts/favorite_screen.dart';
+import 'package:hti22one/contacts/profile/profile_screen.dart';
 import 'package:sqflite/sqflite.dart';
 
 // CRUD => Create , Read , Update, Delete
@@ -54,6 +55,19 @@ class _ContactsMainScreenState extends State<ContactsMainScreen> {
           actions: [
             IconButton(
                 onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => BlocProvider(
+                        create: (context) => AuthCubit(),
+                        child: ProfileScreen(),
+                      ),
+                    ),
+                  );
+                },
+                icon: Icon(Icons.person)),
+            IconButton(
+                onPressed: () {
                   FirebaseAuth.instance.signOut();
                   Navigator.pushReplacement(
                       context,
@@ -64,7 +78,7 @@ class _ContactsMainScreenState extends State<ContactsMainScreen> {
                         ),
                       ));
                 },
-                icon: Icon(Icons.logout))
+                icon: Icon(Icons.logout)),
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(
