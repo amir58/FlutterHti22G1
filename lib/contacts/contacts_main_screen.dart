@@ -1,4 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hti22one/auth/auth_cubit.dart';
@@ -37,6 +40,7 @@ class _ContactsMainScreenState extends State<ContactsMainScreen> {
     super.initState();
     // createDatabase();
     context.read<ContactsCubit>().createDatabase();
+    getFcmTokenAndUpdateIt();
   }
 
   @override
@@ -55,6 +59,7 @@ class _ContactsMainScreenState extends State<ContactsMainScreen> {
           actions: [
             IconButton(
                 onPressed: () {
+
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -106,6 +111,17 @@ class _ContactsMainScreenState extends State<ContactsMainScreen> {
         body: screens[index],
       ),
     );
+  }
+
+  void getFcmTokenAndUpdateIt(){
+    FirebaseMessaging.instance.getToken().then((String? fcmToken) {
+      print("fcmToken => $fcmToken");
+
+      FirebaseFirestore.instance.collection("flutterHti221Users")
+      .doc(FirebaseAuth.instance.currentUser!.uid)
+      .update({"fcmToken" : fcmToken});
+
+    });
   }
 
   void bottomSheet() {
