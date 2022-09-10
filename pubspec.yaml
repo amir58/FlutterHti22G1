@@ -44,6 +44,8 @@ dependencies:
   firebase_storage: ^10.3.7
   firebase_crashlytics: ^2.8.9
   firebase_messaging: ^13.0.0
+  flutter_local_notifications: ^9.9.1
+  rxdart: ^0.27.5
 
 dev_dependencies:
   flutter_test:

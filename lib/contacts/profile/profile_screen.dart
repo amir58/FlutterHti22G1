@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:hti22one/contacts/profile/User.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -91,14 +92,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .get()
         .then((value) {
-          var userData = value.data();
-          print(userData);
+      // var userData = value.data();
+      // profilePictureUrl = userData!['imageUrl'];
 
-          profilePictureUrl = userData!['imageUrl'];
-          setState(() {
+      MyUser user = MyUser.fromJson(value.data());
 
-          });
-    })
-        .catchError((error) => print(error.toString()));
+      profilePictureUrl = user.imageUrl;
+
+      setState(() {});
+    }).catchError((error) => print(error.toString()));
   }
 }

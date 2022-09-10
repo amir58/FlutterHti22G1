@@ -1,10 +1,16 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hti22one/assets_screen.dart';
 import 'package:hti22one/auth/auth_cubit.dart';
 import 'package:hti22one/bmi/bmi.dart';
@@ -14,26 +20,97 @@ import 'package:hti22one/contacts_screen.dart';
 import 'package:hti22one/messenger/messenger_screen.dart';
 import 'package:hti22one/stack.dart';
 import 'package:hti22one/auth/login_screen.dart';
+import 'package:rxdart/subjects.dart';
 
 import 'counter_cubit/counter_cubit_screen.dart';
 import 'names_screen.dart';
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp();
 
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    print('Got a message whilst in the foreground!');
-    print('Message data: ${message.data}');
+  initLocalNotifications();
 
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     if (message.notification != null) {
-      print('Message also contained a notification: ${message.notification!.title}');
-      print('Message also contained a notification: ${message.notification!.body}');
+      String title = message.notification!.title ?? "";
+      String body = message.notification!.body ?? "";
+
+      String payload = jsonEncode(message.data);
+
+      _showNotification(
+        title,
+        body,
+        payload
+      );
     }
   });
 
+  FirebaseMessaging.onBackgroundMessage((RemoteMessage message) async {
+    String payload = jsonEncode(message.data);
+
+    _showNotification(
+        message.notification!.title!,
+        message.notification!.body!,
+        payload
+    );
+  });
+
   runApp(MyApp());
+}
+
+void initLocalNotifications() async {
+  // initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
+  const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  const IOSInitializationSettings initializationSettingsIOS =
+      IOSInitializationSettings();
+
+  const InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+    iOS: initializationSettingsIOS,
+  );
+
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings,
+      onSelectNotification: (String? payload) async {
+        print('PAYLOAD => $payload');
+
+        var data = json.decode(payload!);
+
+        print(data['postId']);
+
+
+        // Navigator.push
+  });
+}
+
+Future<void> _showNotification(String title, String body, String payload) async {
+  const AndroidNotificationDetails androidPlatformChannelSpecifics =
+      AndroidNotificationDetails(
+    'defaultNotifications',
+    'Default Notifications',
+    channelDescription: 'your channel description',
+    importance: Importance.max,
+    priority: Priority.high,
+    ticker: 'ticker',
+  );
+
+  const NotificationDetails platformChannelSpecifics = NotificationDetails(
+    android: androidPlatformChannelSpecifics,
+  );
+
+  await flutterLocalNotificationsPlugin.show(
+    0,
+    null,
+    body,
+    platformChannelSpecifics,
+    payload: payload,
+  );
 }
 
 class MyApp extends StatelessWidget {

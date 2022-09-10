@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hti22one/contacts/profile/User.dart';
 
 part 'auth_state.dart';
 
@@ -30,14 +31,17 @@ class AuthCubit extends Cubit<AuthStates> {
   }
 
   void _saveUserData(User user) {
+    MyUser myUser = MyUser(
+      username: "Amir",
+      email: "amir@gmail.com",
+      gender: "male",
+      phone: "01116036522",
+    );
+
     FirebaseFirestore.instance
         .collection("flutterHti221Users")
         .doc(user.uid)
-        .set({
-      "username": "Amir",
-      "email": "amir@gmail.com",
-      "gender": "male",
-      "phone": "01116036522",
-    }).then((value) => emit(RegisterSuccessState()));
+        .set(myUser.toJson())
+        .then((value) => emit(RegisterSuccessState()));
   }
 }
