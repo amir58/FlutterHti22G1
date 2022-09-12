@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -18,6 +19,8 @@ import 'package:hti22one/contacts/contacts_cubit.dart';
 import 'package:hti22one/contacts/contacts_main_screen.dart';
 import 'package:hti22one/contacts_screen.dart';
 import 'package:hti22one/messenger/messenger_screen.dart';
+import 'package:hti22one/models/MyPost.dart';
+import 'package:hti22one/models/news/NewsResponse.dart';
 import 'package:hti22one/stack.dart';
 import 'package:hti22one/auth/login_screen.dart';
 import 'package:rxdart/subjects.dart';
@@ -42,11 +45,7 @@ void main() async {
 
       String payload = jsonEncode(message.data);
 
-      _showNotification(
-        title,
-        body,
-        payload
-      );
+      _showNotification(title, body, payload);
     }
   });
 
@@ -54,13 +53,56 @@ void main() async {
     String payload = jsonEncode(message.data);
 
     _showNotification(
-        message.notification!.title!,
-        message.notification!.body!,
-        payload
-    );
+        message.notification!.title!, message.notification!.body!, payload);
   });
 
+  getNews("eg", "business");
+  getNews("eg", "sports");
+
   runApp(MyApp());
+}
+
+void getNews(String country, String category) async {
+  try {
+    var response = await Dio().get(
+      'https://newsapi.org/v2/top-headlines',
+      queryParameters: {
+        "country":country,
+        "category":category,
+        "apiKey" : "fa72aea7f1af46a6a45be8aa23e21b64"
+      }
+    );
+    print('RESPONSE => $response');
+
+    NewsResponse newsResponse = NewsResponse.fromJson(response.data);
+    print('Articles ( News ) => ${newsResponse.articles.length}');
+
+    print('--------------------');
+    for (var article in newsResponse.articles) {
+      print('Title => ${article.title}');
+    }
+  } catch (e) {
+    print(e);
+  }
+}
+
+void getPosts() async {
+  try {
+    var response =
+        await Dio().get('https://jsonplaceholder.typicode.com/posts/2');
+    // print("RESPONSE => $response");
+    // print(response.data['userId']);
+    // print(response.data['id']);
+    // print(response.data['title']);
+    // print(response.data['body']);
+
+    MyPost post = MyPost.fromJson(response.data);
+    print(post.title);
+    print(post.body);
+    print(post.toJson());
+  } catch (e) {
+    print(e);
+  }
 }
 
 void initLocalNotifications() async {
@@ -78,18 +120,18 @@ void initLocalNotifications() async {
 
   await flutterLocalNotificationsPlugin.initialize(initializationSettings,
       onSelectNotification: (String? payload) async {
-        print('PAYLOAD => $payload');
+    print('PAYLOAD => $payload');
 
-        var data = json.decode(payload!);
+    var data = json.decode(payload!);
 
-        print(data['postId']);
+    print(data['postId']);
 
-
-        // Navigator.push
+    // Navigator.push
   });
 }
 
-Future<void> _showNotification(String title, String body, String payload) async {
+Future<void> _showNotification(
+    String title, String body, String payload) async {
   const AndroidNotificationDetails androidPlatformChannelSpecifics =
       AndroidNotificationDetails(
     'defaultNotifications',

@@ -25,6 +25,8 @@ class MyUser {
     _imageUrl = json['imageUrl'];
     _email = json['email'];
     _username = json['username'];
+
+
   }
 
   String? _gender;
