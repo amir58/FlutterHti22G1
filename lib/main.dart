@@ -20,7 +20,9 @@ import 'package:hti22one/contacts/contacts_main_screen.dart';
 import 'package:hti22one/contacts_screen.dart';
 import 'package:hti22one/messenger/messenger_screen.dart';
 import 'package:hti22one/models/MyPost.dart';
-import 'package:hti22one/models/news/NewsResponse.dart';
+import 'package:hti22one/news/cubits/news_cubit.dart';
+import 'package:hti22one/news/models/news_response.dart';
+import 'package:hti22one/news/ui/news_screen.dart';
 import 'package:hti22one/stack.dart';
 import 'package:hti22one/auth/login_screen.dart';
 import 'package:rxdart/subjects.dart';
@@ -56,35 +58,9 @@ void main() async {
         message.notification!.title!, message.notification!.body!, payload);
   });
 
-  getNews("eg", "business");
-  getNews("eg", "sports");
-
   runApp(MyApp());
 }
 
-void getNews(String country, String category) async {
-  try {
-    var response = await Dio().get(
-      'https://newsapi.org/v2/top-headlines',
-      queryParameters: {
-        "country":country,
-        "category":category,
-        "apiKey" : "fa72aea7f1af46a6a45be8aa23e21b64"
-      }
-    );
-    print('RESPONSE => $response');
-
-    NewsResponse newsResponse = NewsResponse.fromJson(response.data);
-    print('Articles ( News ) => ${newsResponse.articles.length}');
-
-    print('--------------------');
-    for (var article in newsResponse.articles) {
-      print('Title => ${article.title}');
-    }
-  } catch (e) {
-    print(e);
-  }
-}
 
 void getPosts() async {
   try {
@@ -180,12 +156,14 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.light,
       home: MultiBlocProvider(
         providers: [
+          BlocProvider(create: (context) => NewsCubit()),
           BlocProvider(create: (_) => AuthCubit()),
           BlocProvider(create: (_) => ContactsCubit()),
         ],
-        child: FirebaseAuth.instance.currentUser == null
-            ? LoginScreen()
-            : ContactsMainScreen(),
+        child: NewsScreen(),
+        // child: FirebaseAuth.instance.currentUser == null
+        //     ? LoginScreen()
+        //     : ContactsMainScreen(),
       ),
     );
   }
