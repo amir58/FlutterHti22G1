@@ -1,34 +1,17 @@
 import 'dart:convert';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dio/dio.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:hti22one/assets_screen.dart';
 import 'package:hti22one/auth/auth_cubit.dart';
-import 'package:hti22one/bmi/bmi.dart';
 import 'package:hti22one/contacts/contacts_cubit.dart';
-import 'package:hti22one/contacts/contacts_main_screen.dart';
-import 'package:hti22one/contacts_screen.dart';
-import 'package:hti22one/messenger/messenger_screen.dart';
 import 'package:hti22one/models/MyPost.dart';
+import 'package:hti22one/my_shared_prefrences.dart';
 import 'package:hti22one/news/cubits/news_cubit.dart';
-import 'package:hti22one/news/models/news_response.dart';
 import 'package:hti22one/news/ui/news_screen.dart';
-import 'package:hti22one/stack.dart';
-import 'package:hti22one/auth/login_screen.dart';
-import 'package:rxdart/subjects.dart';
-
-import 'counter_cubit/counter_cubit_screen.dart';
-import 'names_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -36,6 +19,7 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  await PreferenceUtils.init();
   await Firebase.initializeApp();
 
   initLocalNotifications();
@@ -58,27 +42,60 @@ void main() async {
         message.notification!.title!, message.notification!.body!, payload);
   });
 
+  testSharedPreferences();
+
   runApp(MyApp());
 }
 
+void testSharedPreferences() async {
+  final prefs = await SharedPreferences.getInstance();
 
-void getPosts() async {
-  try {
-    var response =
-        await Dio().get('https://jsonplaceholder.typicode.com/posts/2');
-    // print("RESPONSE => $response");
-    // print(response.data['userId']);
-    // print(response.data['id']);
-    // print(response.data['title']);
-    // print(response.data['body']);
+  await prefs.setString("userId", "1");
 
-    MyPost post = MyPost.fromJson(response.data);
-    print(post.title);
-    print(post.body);
-    print(post.toJson());
-  } catch (e) {
-    print(e);
-  }
+  print('- - - - - - - -  - - - - -');
+
+  String? userId = prefs.getString("userId2");
+
+  print("UserId => $userId");
+
+  String userId2 = prefs.getString("userId2") ?? "none";
+
+  print("UserId => $userId2");
+
+  print('- - - - - - - -  - - - - -');
+
+  // Post => jsonEncode => json as String => save as String
+  // => get as String => jsonDecode => json => Model.fromJson(json)
+
+  MyPost post = MyPost(
+      userId: 1, id: 1, title: "Post Title", body: "Test Shared preferences");
+
+  print('post => ${post.toJson().toString()}');
+
+  String postAsJson = jsonEncode(post);
+
+  print('post => $postAsJson');
+
+  await prefs.setString("post", postAsJson);
+
+  String postAsJsonFromShared = prefs.getString("post") ?? "";
+
+  print('post from shared => $postAsJsonFromShared');
+
+  var postJson = jsonDecode(postAsJsonFromShared);
+
+  MyPost post2 = MyPost.fromJson(postJson);
+
+  print(post2.title);
+  print(post2.body);
+
+  print('- - - - - - - -  - - - - -');
+
+  PreferenceUtils.setString(SharedKeys.username, "Amir");
+
+  String username = PreferenceUtils.getString(SharedKeys.username);
+
+  print(username);
 }
 
 void initLocalNotifications() async {
